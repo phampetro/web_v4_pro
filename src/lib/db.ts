@@ -15,7 +15,6 @@ export async function getPool() {
   if (pool) return pool;
 
   try {
-    // Chỉ parse biến môi trường khi thực sự cần kết nối
     const env = envSchema.parse({
       DB_USER: process.env.DB_USER,
       DB_PASSWORD: process.env.DB_PASSWORD,
@@ -24,15 +23,19 @@ export async function getPool() {
       DB_PORT: process.env.DB_PORT,
     });
 
-    const sqlConfig: sql.config = {
+    // Ép kiểu any để tránh lỗi TypeScript khắt khe với các tùy chọn TLS/SSL
+    const sqlConfig: any = {
       user: env.DB_USER,
       password: env.DB_PASSWORD,
       database: env.DB_NAME,
       server: env.DB_SERVER,
       port: env.DB_PORT,
       options: {
-        encrypt: true,
+        encrypt: process.env.DB_ENCRYPT === 'true',
         trustServerCertificate: true,
+        cryptoCredentialsDetails: {
+          checkServerIdentity: () => undefined,
+        },
       },
       pool: {
         max: 10,
