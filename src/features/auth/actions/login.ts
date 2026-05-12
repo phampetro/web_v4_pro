@@ -35,8 +35,11 @@ export async function login(input: LoginInput): Promise<ActionResult> {
       quyen: user.Quyen || '',
     };
 
+    const { encrypt } = await import('@/lib/auth-server');
+    const token = await encrypt(sessionData);
+
     const cookieStore = await cookies();
-    cookieStore.set('session_token', JSON.stringify(sessionData), {
+    cookieStore.set('session_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

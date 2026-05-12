@@ -6,18 +6,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('session_token')?.value;
-  
-  let initialUsername = '';
-  if (sessionToken) {
-    try {
-      const session = JSON.parse(decodeURIComponent(sessionToken));
-      initialUsername = session.username || '';
-    } catch (e) {
-      console.error('Failed to parse session token:', e);
-    }
-  }
+  const { getAuthSession } = await import('@/lib/auth-server');
+  const session = await getAuthSession();
+  const initialUsername = session?.username || '';
 
   return (
     <DashboardLayoutClient initialUsername={initialUsername}>

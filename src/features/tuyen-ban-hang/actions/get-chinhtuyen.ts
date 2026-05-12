@@ -40,11 +40,10 @@ const getCachedChinhtuyen = unstable_cache(
 
 export async function getChinhtuyen(): Promise<ChinhtuyenResponse | { error: string }> {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get('session_token')?.value;
-    if (!session) return { error: 'Unauthorized' };
+    const { getAuthSession } = await import('@/lib/auth-server');
+    const user = await getAuthSession();
+    if (!user) return { error: 'Unauthorized' };
     
-    const user = JSON.parse(session);
     const quyenQL = user.quyenQL || '';
 
     const areas = parseQuyenDL(quyenQL);

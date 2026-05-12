@@ -16,11 +16,9 @@ export interface ChoPhoRequest {
 
 export async function saveChoPho(requests: ChoPhoRequest[]): Promise<{ success: boolean; count?: number; error?: string }> {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get('session_token')?.value;
-    if (!session) return { success: false, error: 'Unauthorized' };
-
-    const user = JSON.parse(session);
+    const { getAuthSession } = await import('@/lib/auth-server');
+    const user = await getAuthSession();
+    if (!user) return { success: false, error: 'Unauthorized' };
     const username = user.username || '';
 
     if (!requests || requests.length === 0) {

@@ -21,11 +21,10 @@ function parseQuyenDL(raw: string): string[] {
 
 export async function getChoPho(checkOnly = false): Promise<ChoPhoResponse | { error: string }> {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get('session_token')?.value;
-    if (!session) return { error: 'Unauthorized' };
+    const { getAuthSession } = await import('@/lib/auth-server');
+    const user = await getAuthSession();
+    if (!user) return { error: 'Unauthorized' };
     
-    const user = JSON.parse(session);
     const areas = parseQuyenDL(user.quyenQL || '');
     
     if (areas.length === 0) return { error: 'Không có quyền dữ liệu' };

@@ -12,11 +12,10 @@ export interface TamNgungRequest {
 
 export async function saveTamNgung(request: TamNgungRequest): Promise<ActionResult> {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get('session_token')?.value;
-    if (!session) return errorResponse('Unauthorized');
+    const { getAuthSession } = await import('@/lib/auth-server');
+    const user = await getAuthSession();
+    if (!user) return errorResponse('Unauthorized');
     
-    const user = JSON.parse(session);
     const nguoi_dang_ky = user.username || 'N/A';
 
     const { rows } = request;

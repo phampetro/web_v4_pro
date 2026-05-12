@@ -22,6 +22,7 @@
     "file-saver": "^2.0.5",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
+    "jose": "^6.2.3",
     "modern-screenshot": "^4.7.0",
     "mssql": "^12.5.2",
     "next": "16.2.5",
