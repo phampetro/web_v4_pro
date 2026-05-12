@@ -25,7 +25,7 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
     const queryParams: Record<string, any> = {};
 
     if (quyenQL) {
-      const allowedAreas = quyenQL.split(/[,-]/).map(a => a.trim()).filter(Boolean);
+      const allowedAreas = quyenQL.split('-').map(a => a.trim()).filter(Boolean);
       if (allowedAreas.length > 0) {
         const areaPlaceholders = allowedAreas.map((a, i) => {
           const p = `area${i}`;

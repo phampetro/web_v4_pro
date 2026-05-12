@@ -27,7 +27,7 @@ export async function getProductConfig(): Promise<ActionResult<ProductConfigResp
     const quyenDL = session.quyenQL || '';
     let userAreas: string[] = [];
     if (quyenDL) {
-      const parts = quyenDL.split(/[,-]/).map(p => p.replace(/["']/g, '').trim()).filter(Boolean);
+      const parts = quyenDL.split('-').map(p => p.replace(/["']/g, '').trim()).filter(Boolean);
       userAreas = [...new Set(parts)].sort();
     }
 
