@@ -24,7 +24,7 @@ const sqlConfig = {
   server: env.DB_SERVER,
   port: env.DB_PORT,
   options: {
-    encrypt: false,
+    encrypt: true, // Ưu tiên bật true để tương thích với Azure/Vercel
     trustServerCertificate: true,
   },
   pool: {

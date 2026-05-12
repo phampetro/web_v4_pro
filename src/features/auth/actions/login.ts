@@ -48,8 +48,12 @@ export async function login(input: LoginInput): Promise<ActionResult> {
     });
 
     return successResponse(null, 'Đăng nhập thành công');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return errorResponse('Đã có lỗi xảy ra trong quá trình đăng nhập');
+    // Trả về thông báo chi tiết hơn để chẩn đoán khi deploy
+    if (error.code === 'ELOGIN' || error.code === 'ECONNREFUSED' || error.message?.includes('connect')) {
+      return errorResponse('Không thể kết nối đến máy chủ cơ sở dữ liệu. Vui lòng kiểm tra địa chỉ Server và tường lửa.');
+    }
+    return errorResponse('Đã có lỗi xảy ra trong quá trình đăng nhập: ' + (error.message || 'Unknown error'));
   }
 }
