@@ -9,13 +9,23 @@ const envSchema = z.object({
   DB_PORT: z.string().default('1433').transform(Number),
 });
 
-const env = envSchema.parse({
-  DB_USER: process.env.DB_USER,
-  DB_PASSWORD: process.env.DB_PASSWORD,
-  DB_SERVER: process.env.DB_SERVER,
-  DB_NAME: process.env.DB_NAME,
-  DB_PORT: process.env.DB_PORT,
-});
+// Chỉ thực hiện parse env khi không phải đang trong quá trình build
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
+
+let env: any = {};
+if (!isBuildTime) {
+  try {
+    env = envSchema.parse({
+      DB_USER: process.env.DB_USER,
+      DB_PASSWORD: process.env.DB_PASSWORD,
+      DB_SERVER: process.env.DB_SERVER,
+      DB_NAME: process.env.DB_NAME,
+      DB_PORT: process.env.DB_PORT,
+    });
+  } catch (error) {
+    console.warn('Cảnh báo: Thiếu biến môi trường DB (Có thể đang trong quá trình build)');
+  }
+}
 
 const sqlConfig = {
   user: env.DB_USER,
