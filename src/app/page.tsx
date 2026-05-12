@@ -6,7 +6,7 @@ export default function LoginPage() {
       {/* Background Image with Overlay */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 hover:scale-105"
-        style={{ backgroundImage: 'url("/images/login-bg.png")' }}
+        style={{ backgroundImage: 'url("/images/login-bg-v2.png")' }}
       />
       <div className="absolute inset-0 z-1 bg-gradient-to-br from-blue-900/80 to-gray-900/90" />
 
