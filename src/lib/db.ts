@@ -2,47 +2,12 @@ import sql from 'mssql';
 import { z } from 'zod';
 
 const envSchema = z.object({
-  DB_USER: z.string(),
-  DB_PASSWORD: z.string(),
-  DB_SERVER: z.string(),
-  DB_NAME: z.string(),
+  DB_USER: z.string().min(1),
+  DB_PASSWORD: z.string().min(1),
+  DB_SERVER: z.string().min(1),
+  DB_NAME: z.string().min(1),
   DB_PORT: z.string().default('1433').transform(Number),
 });
-
-// Chỉ thực hiện parse env khi không phải đang trong quá trình build
-const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
-
-let env: any = {};
-if (!isBuildTime) {
-  try {
-    env = envSchema.parse({
-      DB_USER: process.env.DB_USER,
-      DB_PASSWORD: process.env.DB_PASSWORD,
-      DB_SERVER: process.env.DB_SERVER,
-      DB_NAME: process.env.DB_NAME,
-      DB_PORT: process.env.DB_PORT,
-    });
-  } catch (error) {
-    console.warn('Cảnh báo: Thiếu biến môi trường DB (Có thể đang trong quá trình build)');
-  }
-}
-
-const sqlConfig = {
-  user: env.DB_USER,
-  password: env.DB_PASSWORD,
-  database: env.DB_NAME,
-  server: env.DB_SERVER,
-  port: env.DB_PORT,
-  options: {
-    encrypt: true, // Ưu tiên bật true để tương thích với Azure/Vercel
-    trustServerCertificate: true,
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000,
-  },
-};
 
 let pool: sql.ConnectionPool | null = null;
 
@@ -50,10 +15,37 @@ export async function getPool() {
   if (pool) return pool;
 
   try {
-    console.log(`Connecting to SQL Server: ${env.DB_SERVER}:${env.DB_PORT}...`);
+    // Chỉ parse biến môi trường khi thực sự cần kết nối
+    const env = envSchema.parse({
+      DB_USER: process.env.DB_USER,
+      DB_PASSWORD: process.env.DB_PASSWORD,
+      DB_SERVER: process.env.DB_SERVER,
+      DB_NAME: process.env.DB_NAME,
+      DB_PORT: process.env.DB_PORT,
+    });
+
+    const sqlConfig: sql.config = {
+      user: env.DB_USER,
+      password: env.DB_PASSWORD,
+      database: env.DB_NAME,
+      server: env.DB_SERVER,
+      port: env.DB_PORT,
+      options: {
+        encrypt: true,
+        trustServerCertificate: true,
+      },
+      pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000,
+      },
+    };
+
+    console.log(`Connecting to SQL Server: ${env.DB_SERVER}...`);
     pool = await sql.connect(sqlConfig);
     return pool;
   } catch (err) {
+    console.error('Lỗi kết nối Database:', err);
     pool = null;
     throw err;
   }
