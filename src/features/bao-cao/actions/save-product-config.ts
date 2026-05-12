@@ -3,42 +3,49 @@
 import { getPool } from '@/lib/db';
 import sql from 'mssql';
 import { Product } from '../types';
+import { getAuthSession } from '@/lib/auth-server';
+import { ActionResult, successResponse, errorResponse } from '@/lib/actions';
 
-export async function saveProductConfig(username: string, products: Product[]) {
+export async function saveProductConfig(products: Product[]): Promise<ActionResult> {
   try {
+    const session = await getAuthSession();
+    if (!session) return errorResponse('Chưa đăng nhập hoặc phiên đã hết hạn');
+    
+    const username = session.username;
+
     const pool = await getPool();
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
     try {
-      // 1. Xóa cấu hình cũ
-      const requestDelete = new sql.Request(transaction);
-      requestDelete.input('username', sql.NVarChar, username);
-      await requestDelete.query('DELETE FROM tbl_config_sanpham_baocao WHERE Username = @username');
+      // 1. Xóa cấu hình cũ của user
+      const reqDelete = new sql.Request(transaction);
+      reqDelete.input('username', sql.NVarChar, username);
+      await reqDelete.query('DELETE FROM tbl_danhsach_sp_baophu WHERE Username = @username');
 
-      // 2. Chèn cấu hình mới
-      for (let i = 0; i < products.length; i++) {
-        const p = products[i];
-        const requestInsert = new sql.Request(transaction);
-        requestInsert.input('username', sql.NVarChar, username);
-        requestInsert.input('ma_sp', sql.NVarChar, p.MA_SPQD);
-        requestInsert.input('ten_sp', sql.NVarChar, p.TEN_SPQD);
-        requestInsert.input('stt', sql.Int, i + 1);
-        
-        await requestInsert.query(`
-          INSERT INTO tbl_config_sanpham_baocao (Username, MA_SPQD, TEN_SPQD, Thu_tu_sap_xep)
-          VALUES (@username, @ma_sp, @ten_sp, @stt)
-        `);
+      // 2. Chèn danh sách mới
+      if (products.length > 0) {
+        for (const p of products) {
+          const reqInsert = new sql.Request(transaction);
+          reqInsert.input('ma_spqd', sql.NVarChar, p.MA_SPQD);
+          reqInsert.input('ten_spqd', sql.NVarChar, p.TEN_SPQD);
+          reqInsert.input('username', sql.NVarChar, username);
+          reqInsert.input('thu_tu', sql.Int, p.Thu_tu_sap_xep);
+          await reqInsert.query(`
+            INSERT INTO tbl_danhsach_sp_baophu (MA_SPQD, TEN_SPQD, Username, Thu_tu_sap_xep)
+            VALUES (@ma_spqd, @ten_spqd, @username, @thu_tu)
+          `);
+        }
       }
 
       await transaction.commit();
-      return { success: true };
+      return successResponse(null, 'Lưu cấu hình sản phẩm thành công');
     } catch (err) {
       await transaction.rollback();
       throw err;
     }
   } catch (error) {
     console.error('saveProductConfig error:', error);
-    return { error: 'Lỗi khi lưu cấu hình sản phẩm' };
+    return errorResponse('Lỗi khi lưu cấu hình sản phẩm');
   }
 }

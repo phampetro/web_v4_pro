@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DMS Report V4",
   description: "Hệ thống báo cáo DMS Report V4",
+  icons: {
+    icon: "/logo.jpg",
+  },
 };
 
 export default function RootLayout({

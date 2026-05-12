@@ -22,7 +22,8 @@ import {
   HomeOutlined,
   ReloadOutlined,
   LockOutlined,
-  DownOutlined
+  DownOutlined,
+  BarChartOutlined
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { logout } from '@/features/auth/actions/logout';
@@ -133,9 +134,12 @@ export default function DashboardLayoutClient({
       ],
     },
     {
-      key: '/dashboard/cau-hinh',
-      icon: <SettingOutlined />,
-      label: 'Cấu hình sản phẩm',
+      key: 'bao-cao',
+      icon: <BarChartOutlined />,
+      label: 'Báo cáo',
+      children: [
+        { key: '/dashboard/cau-hinh', icon: <SettingOutlined />, label: 'Báo cáo bao phủ' }
+      ]
     },
   ];
 
@@ -215,6 +219,7 @@ export default function DashboardLayoutClient({
           <Menu
             mode="inline"
             selectedKeys={[pathname]}
+            defaultOpenKeys={['khach-hang', 'tuyen-ban-hang', 'bao-cao']}
             items={menuItems}
             style={{ border: 'none' }}
             onClick={({ key }) => router.push(key)}
@@ -254,7 +259,7 @@ export default function DashboardLayoutClient({
                 if (pathname === '/dashboard/tuyen-ban-hang/xem-nhanh') return 'Xem nhanh tuyến';
                 if (pathname === '/dashboard/tuyen-ban-hang/dieu-chinh') return 'Điều chỉnh tuyến';
                 if (pathname === '/dashboard/tuyen-ban-hang/duyet-chinh') return 'Duyệt chỉnh tuyến';
-                if (pathname === '/dashboard/cau-hinh') return 'Cấu hình sản phẩm';
+                if (pathname === '/dashboard/cau-hinh') return 'Báo cáo bao phủ';
                 return 'Hệ thống báo cáo';
               })()}
             </Text>

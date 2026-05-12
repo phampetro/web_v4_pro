@@ -73,7 +73,7 @@ export function ChoPhoFilters({ data, filters, onChange }: ChoPhoFiltersProps) {
         />
       </div>
 
-      <div className="flex-[2] min-w-[250px]">
+      <div className="flex-1 min-w-[250px]">
         <Text type="secondary" className="text-xs block mb-1">Mã - Tên KH</Text>
         <Select
           placeholder="Tìm kiếm khách hàng..."

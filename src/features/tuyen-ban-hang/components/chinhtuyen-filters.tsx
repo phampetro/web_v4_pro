@@ -53,8 +53,8 @@ export function ChinhtuyenFilters({ filters, options, onChange }: ChinhtuyenFilt
         />
       </div>
 
-      <div className="flex-[1.5] min-w-[250px]">
-        <Text type="secondary" className="text-xs block mb-1">Khách hàng</Text>
+      <div className="flex-1 min-w-[250px]">
+        <Text type="secondary" className="text-xs block mb-1">Mã - Tên KH</Text>
         <Select
           placeholder="Tất cả"
           value={filters.kh}

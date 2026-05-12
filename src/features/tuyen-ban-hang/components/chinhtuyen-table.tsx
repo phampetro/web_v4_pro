@@ -155,6 +155,9 @@ export function ChinhtuyenTable({
           padding: 4px 8px !important;
           vertical-align: middle !important;
         }
+        .ant-table-small {
+          font-size: 12px !important;
+        }
       `}} />
     </>
   );

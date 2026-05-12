@@ -125,7 +125,7 @@ export function DangkyTuyenTable({
     {
       title: 'Thứ',
       key: 'Thứ',
-      width: TABLE_CONFIG.COL_THU + 80,
+      width: TABLE_CONFIG.COL_THU + 100,
       render: (_, r) => {
         const dbStatus = pendingStatus[r.Mã_KH];
 
@@ -263,6 +263,12 @@ export function DangkyTuyenTable({
           white-space: nowrap !important;
           padding: 4px 8px !important;
           vertical-align: middle !important;
+        }
+        .ant-table-small {
+          font-size: 12px !important;
+        }
+        .ant-select-selection-item {
+          font-size: 12px !important;
         }
         .read-only-selection .ant-table-selection-column {
           pointer-events: none !important;
