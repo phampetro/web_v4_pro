@@ -103,24 +103,21 @@ echo.
 echo [INFO] Dang build Next.js (Standalone mode)...
 call npm run build
 
-:: 7. COPY STATIC ASSETS (Fix loi mat giao dien CSS/JS)
-echo [INFO] Dang chuan bi file giao dien (CSS/JS/Public)...
+:: 7. COPY STATIC ASSETS & ENV (Fix loi mat giao dien va Session)
+echo [INFO] Dang chuan bi file giao dien va cau hinh (.env)...
 if not exist ".next\standalone\.next\static" mkdir ".next\standalone\.next\static"
 xcopy /y /e /s /i ".next\static" ".next\standalone\.next\static" >nul
 if not exist ".next\standalone\public" mkdir ".next\standalone\public"
 xcopy /y /e /s /i "public" ".next\standalone\public" >nul
 
-:: 8. CHAY UNG DUNG MOI VOI BIEN MOI TRUONG
+:: Copy file .env vao standalone de Next.js tu doc
+copy /y ".env" ".next\standalone\.env" >nul
+
+:: 8. CHAY UNG DUNG MOI
 echo.
 echo [BUOC 4] DANG KHOI CHAY UNG DUNG MOI...
-
-:: Nap cac bien tu .env vao bien moi truong cua shell hien tai
-for /f "usebackq tokens=*" %%a in (".env") do (
-    set "%%a"
-)
-
 call pm2 delete web_v4 >nul 2>&1
-call pm2 start .next\standalone\server.js --name "web_v4" --env SESSION_SECRET=%SESSION_SECRET% --env NEXTAUTH_SECRET=%NEXTAUTH_SECRET% --env NEXTAUTH_URL=%NEXTAUTH_URL% --env DB_USER=%DB_USER% --env DB_PASSWORD=%DB_PASSWORD% --env DB_SERVER=%DB_SERVER% --env DB_PORT=%DB_PORT% --env DB_NAME=%DB_NAME%
+call pm2 start .next\standalone\server.js --name "web_v4"
 call pm2 save
 
 :: 7. CHAY CADDY SERVICE
