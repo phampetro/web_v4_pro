@@ -80,7 +80,7 @@ export function SanPhamConfigMomoi() {
   const [exporting, setExporting] = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
-  const [reportType, setReportType] = useState('khach_hang');
+  const [reportType, setReportType] = useState('pt_diem_ban');
   const [filterAreas, setFilterAreas] = useState<string[]>([]);
   const [areaOptions, setAreaOptions] = useState<{ label: string, value: string }[]>([]);
 
@@ -167,7 +167,45 @@ export function SanPhamConfigMomoi() {
   }, [saveStatus, selectedProducts]);
 
   const handleExport = async () => {
-    message.info('Tính năng xuất Excel cho báo cáo mở mới sẽ sớm được cập nhật');
+    if (selectedProducts.length === 0) {
+      message.warning('Vui lòng chọn ít nhất 1 sản phẩm');
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const response = await fetch('/api/bao-cao-mo-moi/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          products: selectedProducts,
+          reportType,
+          areas: filterAreas.length > 0 ? filterAreas : areaOptions.map(o => o.value),
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || 'Lỗi xuất báo cáo');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = reportType === 'pt_diem_ban' ? 'bao_cao_phan_tich_do_phu' : 'bao_cao_mo_moi';
+      a.download = `${fileName}_${new Date().getTime()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      message.success('Xuất báo cáo thành công');
+    } catch (error: any) {
+      message.error(error.message);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const columns = [
@@ -293,7 +331,20 @@ export function SanPhamConfigMomoi() {
               </div>
 
               <div>
-                <Text strong className="block mb-2">1. Lọc theo Khu vực</Text>
+                <Text strong className="block mb-2">1. Loại báo cáo</Text>
+                <Select
+                  className="w-full"
+                  value={reportType}
+                  onChange={setReportType}
+                  options={[
+                    { label: 'Phân tích điểm bán độ phủ', value: 'pt_diem_ban' },
+                    { label: 'Mở mới sản phẩm (Sắp ra mắt)', value: 'mo_moi_sp', disabled: true },
+                  ]}
+                />
+              </div>
+
+              <div>
+                <Text strong className="block mb-2">2. Lọc theo Khu vực</Text>
                 <Select
                   mode="multiple"
                   className="w-full"
@@ -316,8 +367,13 @@ export function SanPhamConfigMomoi() {
                   disabled={selectedProducts.length === 0}
                   className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 font-semibold text-base disabled:bg-gray-300 disabled:border-transparent"
                 >
-                  XUẤT BÁO CÁO EXCEL (SẮP RA MẮT)
+                  XUẤT BÁO CÁO EXCEL
                 </Button>
+                {selectedProducts.length === 0 && (
+                  <Text type="danger" className="block text-center mt-2 animate-pulse">
+                    * Vui lòng chọn ít nhất 1 sản phẩm vào danh sách để xuất báo cáo
+                  </Text>
+                )}
               </div>
             </Flex>
           </Card>
