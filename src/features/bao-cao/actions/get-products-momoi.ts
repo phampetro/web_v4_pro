@@ -12,8 +12,14 @@ export async function getProductConfigMomoi(): Promise<ActionResult<ProductConfi
     
     const username = session.username;
 
-    // Lấy tất cả sản phẩm
-    const resAll = await query<Product>('SELECT MA_SPQD, MAX(TEN_SPQD) as TEN_SPQD FROM tbl_SanPhamDistinct GROUP BY MA_SPQD ORDER BY MA_SPQD');
+    // Lấy danh sách sản phẩm duy nhất từ bảng dữ liệu bao phủ
+    const resAll = await query<{ TEN_SPQD: string }>('SELECT DISTINCT TEN_SPQD FROM tbl_baophu_nv_92 WHERE TEN_SPQD IS NOT NULL ORDER BY TEN_SPQD');
+    
+    // Map lại để phù hợp với interface Product (Dùng TEN_SPQD làm MA_SPQD vì bảng này không có mã SP)
+    const allProducts: Product[] = resAll.recordset.map(item => ({
+      MA_SPQD: item.TEN_SPQD,
+      TEN_SPQD: item.TEN_SPQD
+    }));
     
     // Lấy cấu hình của user từ bảng momoi
     const resUser = await query<Product>(`
@@ -32,7 +38,7 @@ export async function getProductConfigMomoi(): Promise<ActionResult<ProductConfi
     }
 
     return successResponse({
-      allProducts: resAll.recordset,
+      allProducts: allProducts,
       userConfig: resUser.recordset,
       areas: userAreas,
     });
