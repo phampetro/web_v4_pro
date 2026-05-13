@@ -240,16 +240,19 @@ export function SanPhamConfigMomoi() {
 
   const searchOptions = useMemo(() => {
     const selectedIds = new Set(selectedProducts.map(p => p.MA_SPQD));
-    return allProducts.map(p => ({
-      value: p.MA_SPQD,
-      label: (
-        <Flex gap={8} align="center">
-          <Checkbox checked={selectedIds.has(p.MA_SPQD)} />
-          <span>{p.MA_SPQD} - {p.TEN_SPQD}</span>
-        </Flex>
-      ),
-      search: `${p.MA_SPQD} ${p.TEN_SPQD}`.toLowerCase()
-    }));
+    return allProducts.map(p => {
+      const isSame = p.MA_SPQD === p.TEN_SPQD;
+      return {
+        value: p.MA_SPQD,
+        label: (
+          <Flex gap={8} align="center">
+            <Checkbox checked={selectedIds.has(p.MA_SPQD)} />
+            <span>{isSame ? p.TEN_SPQD : `${p.MA_SPQD} - ${p.TEN_SPQD}`}</span>
+          </Flex>
+        ),
+        search: isSame ? p.TEN_SPQD.toLowerCase() : `${p.MA_SPQD} ${p.TEN_SPQD}`.toLowerCase()
+      };
+    });
   }, [allProducts, selectedProducts]);
 
   return (
