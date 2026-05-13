@@ -41,7 +41,7 @@ export async function login(input: LoginInput): Promise<ActionResult> {
     const cookieStore = await cookies();
     cookieStore.set('session_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Cho phép chạy cả trên HTTP (không SSL)
       sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 1 ngày
       path: '/',
