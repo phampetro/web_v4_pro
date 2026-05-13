@@ -23,6 +23,7 @@ import {
   ReloadOutlined,
   LockOutlined,
   DownOutlined,
+  PlusCircleOutlined,
   BarChartOutlined
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
@@ -138,7 +139,8 @@ export default function DashboardLayoutClient({
       icon: <BarChartOutlined />,
       label: 'Báo cáo',
       children: [
-        { key: '/dashboard/cau-hinh', icon: <SettingOutlined />, label: 'Báo cáo bao phủ' }
+        { key: '/dashboard/cau-hinh', icon: <SettingOutlined />, label: 'Báo cáo bao phủ' },
+        { key: '/dashboard/bao-cao-mo-moi', icon: <PlusCircleOutlined />, label: 'Báo cáo mở mới' }
       ]
     },
   ];
@@ -260,6 +262,7 @@ export default function DashboardLayoutClient({
                 if (pathname === '/dashboard/tuyen-ban-hang/dieu-chinh') return 'Điều chỉnh tuyến';
                 if (pathname === '/dashboard/tuyen-ban-hang/duyet-chinh') return 'Duyệt chỉnh tuyến';
                 if (pathname === '/dashboard/cau-hinh') return 'Báo cáo bao phủ';
+                if (pathname === '/dashboard/bao-cao-mo-moi') return 'Báo cáo mở mới';
                 return 'Hệ thống báo cáo';
               })()}
             </Text>
