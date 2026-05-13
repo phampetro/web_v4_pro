@@ -179,6 +179,7 @@ export async function POST(req: NextRequest) {
           if ((nppRows as any[]).length > 1) {
             worksheet.mergeCells(startNppRow, 1, currentRowIndex - 1, 1);
             worksheet.mergeCells(startNppRow, 2, currentRowIndex - 1, 2);
+            worksheet.mergeCells(startNppRow, 3, currentRowIndex - 1, 3);
           }
           stt++;
 
