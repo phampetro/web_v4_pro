@@ -110,10 +110,17 @@ xcopy /y /e /s /i ".next\static" ".next\standalone\.next\static" >nul
 if not exist ".next\standalone\public" mkdir ".next\standalone\public"
 xcopy /y /e /s /i "public" ".next\standalone\public" >nul
 
-:: 8. CHAY UNG DUNG
+:: 8. CHAY UNG DUNG MOI VOI BIEN MOI TRUONG
 echo.
 echo [BUOC 4] DANG KHOI CHAY UNG DUNG MOI...
-call pm2 start .next\standalone\server.js --name "web_v4"
+
+:: Nap cac bien tu .env vao bien moi truong cua shell hien tai
+for /f "usebackq tokens=*" %%a in (".env") do (
+    set "%%a"
+)
+
+call pm2 delete web_v4 >nul 2>&1
+call pm2 start .next\standalone\server.js --name "web_v4" --env SESSION_SECRET=%SESSION_SECRET% --env NEXTAUTH_SECRET=%NEXTAUTH_SECRET% --env NEXTAUTH_URL=%NEXTAUTH_URL% --env DB_USER=%DB_USER% --env DB_PASSWORD=%DB_PASSWORD% --env DB_SERVER=%DB_SERVER% --env DB_PORT=%DB_PORT% --env DB_NAME=%DB_NAME%
 call pm2 save
 
 :: 7. CHAY CADDY SERVICE
