@@ -195,7 +195,6 @@ export function ChoPhoTable({
           showTotal: (total) => (
             <span>Tổng cộng: <b className="text-blue-600">{total}</b> khách hàng</span>
           ),
-          placement: ['bottomRight'],
           size: 'small'
         }}
         className="border border-gray-100 rounded-lg overflow-hidden shadow-sm bg-white"

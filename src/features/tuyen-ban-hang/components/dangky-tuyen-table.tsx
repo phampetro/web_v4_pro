@@ -315,7 +315,6 @@ export function DangkyTuyenTable({
               {selectedRowKeys.length > 0 && <> | Đã chọn: <b className="text-orange-600">{selectedRowKeys.length}</b></>}
             </span>
           ),
-          placement: ['bottomRight'],
           size: 'small'
         }}
       />
