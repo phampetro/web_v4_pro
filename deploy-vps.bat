@@ -92,6 +92,14 @@ echo [INFO] Dang don dep: Tat PM2, Caddy va xoa build cu...
 call pm2 delete web_v4 >nul 2>&1
 call pm2 delete all >nul 2>&1
 caddy stop >nul 2>&1
+
+:: Doi 5 giay de Windows giai phong file handle
+echo [INFO] Doi 5 giay de he thong giai phong file...
+timeout /t 5 /nobreak >nul
+
+:: Cuong ep tat cac tien trinh node dang treo (neu co)
+taskkill /f /im node.exe >nul 2>&1
+
 if exist ".next" rmdir /s /q ".next"
 echo [OK] Da don dep xong. San sang build moi.
 
