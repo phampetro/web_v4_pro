@@ -124,7 +124,12 @@ copy /y ".env" ".next\standalone\.env" >nul
 :: 8. CHAY UNG DUNG MOI
 echo.
 echo [BUOC 4] DANG KHOI CHAY UNG DUNG MOI...
+:: Ep dung chung thu muc PM2 voi Administrator de de quan ly
+set PM2_HOME=C:\Users\Administrator\.pm2
 call pm2 delete web_v4 >nul 2>&1
+:: Ep Next.js lang nghe tren tat ca cac IP (0.0.0.0) de truy cap duoc tu ben ngoai
+set HOSTNAME=0.0.0.0
+set PORT=3000
 call pm2 start .next\standalone\server.js --name "web_v4"
 call pm2 save
 
