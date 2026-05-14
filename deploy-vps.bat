@@ -7,13 +7,8 @@ echo       DMS REPORT V4 - VPS SETUP WIZARD (WINDOWS)
 echo ======================================================
 echo.
 
-:: 1. KIEM TRA DIEU KIEN CAN & DON DEP CONG 80
-echo [INFO] Dang kiem tra quyen Admin va don dep cong 80...
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [LOI] Vui long chay file .bat nay bang quyen "Run as Administrator".
-    exit /b 1
-)
+:: 1. KIEM TRA DIEU KIEN CAN
+echo [INFO] Dang kiem tra moi truong...
 
 :: Tu dong tat IIS de giai phong cong 80
 echo [INFO] Dang dung dich vu IIS (neu co) de giai phong cong 80...
