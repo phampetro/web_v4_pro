@@ -277,6 +277,19 @@ export function DangkyTuyenTable({
         .read-only-selection .ant-table-selection-column .ant-checkbox-input {
           display: none !important;
         }
+        /* Cấu hình phân trang chuyên nghiệp */
+        .ant-table-pagination.ant-pagination {
+          margin: 12px 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-end !important;
+        }
+        .ant-pagination-total-text {
+          margin-right: auto !important;
+          font-size: 11px;
+          color: #64748b;
+          font-weight: 500;
+        }
       `}} />
       <Table
         className="border border-gray-100 rounded-lg overflow-hidden flex-1 read-only-selection"
@@ -293,15 +306,18 @@ export function DangkyTuyenTable({
             disabled: !!(pendingStatus[r.Mã_KH] && pendingStatus[r.Mã_KH].status === 'Chờ duyệt'),
           }),
         }}
-        pagination={false}
-        footer={() => (
-          <div className="py-2 px-4 bg-gray-50/50 border-t border-gray-100 rounded-b-lg">
-            <span className="text-gray-500 text-[11px]">
-              Tổng cộng: <b>{data.length}</b> khách hàng
-              {selectedRowKeys.length > 0 && <> | Đã chọn: <b className="text-blue-600">{selectedRowKeys.length}</b></>}
+        pagination={{
+          pageSize: 300,
+          showSizeChanger: false,
+          showTotal: (total) => (
+            <span className="text-[11px] text-gray-500">
+              Tổng cộng: <b className="text-blue-600">{total}</b> khách hàng
+              {selectedRowKeys.length > 0 && <> | Đã chọn: <b className="text-orange-600">{selectedRowKeys.length}</b></>}
             </span>
-          </div>
-        )}
+          ),
+          position: ['bottomRight'],
+          size: 'small'
+        }}
       />
     </>
   );

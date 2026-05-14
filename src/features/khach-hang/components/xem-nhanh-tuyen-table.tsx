@@ -130,6 +130,19 @@ export function XemNhanhTuyenTable({ data, loading, pageSize, onPageSizeChange }
         .ant-table-row:hover > td {
           background-color: #f1f5f9 !important;
         }
+        /* Cấu hình phân trang chuyên nghiệp */
+        .ant-table-pagination.ant-pagination {
+          margin: 12px 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-end !important;
+        }
+        .ant-pagination-total-text {
+          margin-right: auto !important;
+          font-size: 11px;
+          color: #64748b;
+          font-weight: 500;
+        }
       `}} />
       <Table
         columns={columns}
@@ -138,15 +151,16 @@ export function XemNhanhTuyenTable({ data, loading, pageSize, onPageSizeChange }
         rowKey="key"
         size="small"
         scroll={{ x: TABLE_SCROLL_X.PIVOT, y: TABLE_CONFIG.SCROLL_Y_PIVOT || 550 }}
-        pagination={false}
+        pagination={{
+          pageSize: 300,
+          showSizeChanger: false,
+          showTotal: (total) => (
+            <span>Tổng cộng: <b className="text-blue-600">{total}</b> dòng dữ liệu</span>
+          ),
+          position: ['bottomRight'],
+          size: 'small'
+        }}
         virtual
-        footer={() => (
-          <div className="py-2 px-4 bg-gray-50/50 border-t border-gray-100 rounded-b-lg">
-            <span className="text-gray-500 text-[11px]">
-              Tổng cộng: <b>{data.length}</b> dòng dữ liệu
-            </span>
-          </div>
-        )}
       />
     </>
   );

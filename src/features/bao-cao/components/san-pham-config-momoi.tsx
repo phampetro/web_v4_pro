@@ -52,6 +52,18 @@ const COMPACT_STYLE = `
     width: 24px;
     height: 24px;
   }
+  /* Cấu hình phân trang chuyên nghiệp */
+  .ant-table-pagination.ant-pagination {
+    margin: 8px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+  }
+  .ant-pagination-total-text {
+    margin-right: auto !important;
+    font-size: 11px;
+    color: #64748b;
+  }
 `;
 
 // Row component for DnD
@@ -287,7 +299,15 @@ export function SanPhamConfigMomoi() {
                     dataSource={selectedProducts}
                     columns={columns}
                     rowKey="MA_SPQD"
-                    pagination={false}
+                    pagination={{
+                      pageSize: 300,
+                      showSizeChanger: false,
+                      showTotal: (total) => (
+                        <span>Tổng: <b className="text-blue-600">{total}</b></span>
+                      ),
+                      position: ['bottomRight'],
+                      size: 'small'
+                    }}
                     size="small"
                     scroll={{ y: 400 }}
                     className="compact-table"

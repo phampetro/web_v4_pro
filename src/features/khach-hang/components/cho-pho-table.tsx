@@ -147,10 +147,19 @@ export function ChoPhoTable({
         .ant-table-small .ant-table-thead > tr > th {
           text-align: center !important;
         }
+        /* Cấu hình phân trang chuyên nghiệp */
         .ant-table-pagination.ant-pagination {
-          justify-content: center !important;
-          width: 100% !important;
-          margin: 10px 0 !important;
+          margin: 12px 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-end !important; /* Đưa nút sang phải */
+        }
+        /* Đưa thông tin tổng cộng sang bên trái của thanh phân trang */
+        .ant-pagination-total-text {
+          margin-right: auto !important;
+          font-size: 12px;
+          color: #666;
+          font-weight: 500;
         }
         .ant-table-small {
           font-size: 12px !important;
@@ -178,14 +187,15 @@ export function ChoPhoTable({
             };
           }
         }}
-        pagination={false}
-        footer={() => (
-          <div className="py-2 px-4 bg-gray-50/50 border-t border-gray-100 rounded-b-lg">
-            <span className="text-gray-500 text-[11px]">
-              Tổng cộng: <b>{data.length}</b> khách hàng
-            </span>
-          </div>
-        )}
+        pagination={{
+          pageSize: 300,
+          showSizeChanger: false,
+          showTotal: (total) => (
+            <span>Tổng cộng: <b className="text-blue-600">{total}</b> khách hàng</span>
+          ),
+          position: ['bottomRight'],
+          size: 'small'
+        }}
         className="border border-gray-100 rounded-lg overflow-hidden shadow-sm bg-white"
         onRow={(record) => {
           const dbStatus = pendingInDB[record.Mã_KH];

@@ -130,14 +130,15 @@ export function ChinhtuyenTable({
           onChange: onSelectionChange,
           columnWidth: TABLE_CONFIG.COL_SELECT,
         }}
-        pagination={false}
-        footer={() => (
-          <div className="py-2 px-4 bg-gray-50/50 border-t border-gray-100 rounded-b-lg">
-            <span className="text-gray-500 text-[11px]">
-              Tổng cộng: <b>{data.length}</b> yêu cầu duyệt
-            </span>
-          </div>
-        )}
+        pagination={{
+          pageSize: 300,
+          showSizeChanger: false,
+          showTotal: (total) => (
+            <span className="text-[11px] text-gray-500">Tổng cộng: <b className="text-blue-600">{total}</b> yêu cầu duyệt</span>
+          ),
+          position: ['bottomRight'],
+          size: 'small'
+        }}
       />
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -157,6 +158,16 @@ export function ChinhtuyenTable({
         }
         .ant-table-small {
           font-size: 12px !important;
+        }
+        /* Cấu hình phân trang chuyên nghiệp */
+        .ant-table-pagination.ant-pagination {
+          margin: 12px 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-end !important;
+        }
+        .ant-pagination-total-text {
+          margin-right: auto !important;
         }
       `}} />
     </>
