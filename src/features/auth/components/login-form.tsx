@@ -20,7 +20,9 @@ export function LoginForm() {
       const result = await login(values);
       if (result.success) {
         message.success('Đăng nhập thành công!');
-        router.push('/dashboard');
+        // Dùng full page reload thay vì client-side navigation
+        // để đảm bảo cookie session được gửi kèm (fix lỗi truy cập qua IP)
+        window.location.href = '/dashboard';
       } else {
         message.error(result.error || 'Tài khoản hoặc mật khẩu không chính xác');
       }
