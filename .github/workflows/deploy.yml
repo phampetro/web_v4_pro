@@ -17,4 +17,6 @@ jobs:
         shell: cmd
         run: |
           cd /d D:\web_v4\web_v4_pro
+          git fetch origin
+          git reset --hard origin/main
           call deploy-vps.bat
