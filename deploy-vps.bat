@@ -91,9 +91,14 @@ if %errorlevel% neq 0 (
     call npm install -g pm2
 )
 
-:: 5. DUNG UNG DUNG CU DE GIAI PHONG FILE (Fix loi EBUSY)
-echo [INFO] Dang dung ung dung cu de giai phong file cho viec Build...
+:: 5. DON DEP TOAN BO TRUOC KHI BUILD (Fix loi EBUSY/Locked)
+echo.
+echo [INFO] Dang don dep: Tat PM2, Caddy va xoa build cu...
 call pm2 delete web_v4 >nul 2>&1
+call pm2 delete all >nul 2>&1
+caddy stop >nul 2>&1
+if exist ".next" rmdir /s /q ".next"
+echo [OK] Da don dep xong. San sang build moi.
 
 :: 6. BUILD VA TRIEN KHAI
 echo [BUOC 3] DANG CAI DAT THU VIEN VA BUILD DU AN...
@@ -116,7 +121,6 @@ copy /y ".env" ".next\standalone\.env" >nul
 :: 8. CHAY UNG DUNG MOI
 echo.
 echo [BUOC 4] DANG KHOI CHAY UNG DUNG MOI...
-call pm2 delete web_v4 >nul 2>&1
 call pm2 start .next\standalone\server.js --name "web_v4"
 call pm2 save
 
