@@ -17,8 +17,8 @@ jobs:
         shell: cmd
         run: |
           cd /d D:\web_v4\web_v4_pro
-          echo "Dong bo code tu thu muc GitHub Actions sang thu muc Production..."
-          git fetch "%GITHUB_WORKSPACE%"
-          git reset --hard FETCH_HEAD
-          echo "Thuc thi script deploy..."
+          echo "Dang tien hanh tai code moi nhat tu nhanh main..."
+          git fetch origin
+          git reset --hard origin/main
+          echo "Thuc thi script deploy-vps.bat..."
           call deploy-vps.bat
