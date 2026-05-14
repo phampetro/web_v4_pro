@@ -157,7 +157,7 @@ export function XemNhanhTuyenTable({ data, loading, pageSize, onPageSizeChange }
           showTotal: (total) => (
             <span>Tổng cộng: <b className="text-blue-600">{total}</b> dòng dữ liệu</span>
           ),
-          position: ['bottomRight'],
+          placement: ['bottomRight'],
           size: 'small'
         }}
         virtual

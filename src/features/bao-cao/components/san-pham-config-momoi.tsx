@@ -307,7 +307,7 @@ export function SanPhamConfigMomoi() {
                       showTotal: (total) => (
                         <span>Tổng: <b className="text-blue-600">{total}</b></span>
                       ),
-                      position: ['bottomRight'],
+                      placement: ['bottomRight'],
                       size: 'small'
                     }}
                     size="small"

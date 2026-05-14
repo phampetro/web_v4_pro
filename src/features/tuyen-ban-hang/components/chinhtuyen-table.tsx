@@ -136,7 +136,7 @@ export function ChinhtuyenTable({
           showTotal: (total) => (
             <span className="text-[11px] text-gray-500">Tổng cộng: <b className="text-blue-600">{total}</b> yêu cầu duyệt</span>
           ),
-          position: ['bottomRight'],
+          placement: ['bottomRight'],
           size: 'small'
         }}
       />
