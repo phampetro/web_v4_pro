@@ -98,10 +98,10 @@ echo [OK] Da don dep xong. San sang build moi.
 :: 6. BUILD VA TRIEN KHAI
 echo [BUOC 3] DANG CAI DAT THU VIEN VA BUILD DU AN...
 echo.
-call npm install
+call npm install || exit /b 1
 echo.
 echo [INFO] Dang build Next.js (Standalone mode)...
-call npm run build
+call npm run build || exit /b 1
 
 :: 7. COPY STATIC ASSETS & ENV (Fix loi mat giao dien va Session)
 echo [INFO] Dang chuan bi file giao dien va cau hinh (.env)...
