@@ -12,7 +12,7 @@ echo [INFO] Dang kiem tra quyen Admin va don dep cong 80...
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo [LOI] Vui long chay file .bat nay bang quyen "Run as Administrator".
-    pause & exit /b
+    exit /b 1
 )
 
 :: Tu dong tat IIS de giai phong cong 80
@@ -28,7 +28,7 @@ if %errorlevel% neq 0 (
 
 if not exist "caddy.exe" (
     echo [LOI] Khong tim thay file caddy.exe. Hay copy vao thu muc goc.
-    pause & exit /b
+    exit /b 1
 )
 
 :: 2. CAU HINH FILE .ENV (Neu chua co)
@@ -121,6 +121,7 @@ copy /y ".env" ".next\standalone\.env" >nul
 :: 8. CHAY UNG DUNG MOI
 echo.
 echo [BUOC 4] DANG KHOI CHAY UNG DUNG MOI...
+call pm2 delete web_v4 >nul 2>&1
 call pm2 start .next\standalone\server.js --name "web_v4"
 call pm2 save
 
@@ -132,6 +133,5 @@ caddy start --config Caddyfile
 echo.
 echo ======================================================
 echo    XONG! WEB CUA ONG DA SAN SANG TAI: https://!MY_DOMAIN!
-echo    Chu y: Neu day la lan dau, hay mo port 80 va 443 tren Firewall.
 echo ======================================================
-pause
+exit /b 0
