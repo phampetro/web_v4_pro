@@ -7,21 +7,27 @@ import { loginSchema, type LoginInput } from '@/types/auth';
 import { useRouter } from 'next/navigation';
 import { login } from '../actions/login';
 
+import { Turnstile } from '@marsidev/react-turnstile';
+
 const { Title, Text } = Typography;
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState<string>('');
   const router = useRouter();
   const { message } = App.useApp();
 
   const onFinish = async (values: LoginInput) => {
+    if (!token) {
+      message.warning('Vui lòng hoàn thành xác thực bảo mật!');
+      return;
+    }
+
     setLoading(true);
     try {
-      const result = await login(values);
+      const result = await login({ ...values, token });
       if (result.success) {
         message.success('Đăng nhập thành công!');
-        // Dùng full page reload thay vì client-side navigation
-        // để đảm bảo cookie session được gửi kèm (fix lỗi truy cập qua IP)
         window.location.href = '/dashboard';
       } else {
         message.error(result.error || 'Tài khoản hoặc mật khẩu không chính xác');
@@ -75,6 +81,15 @@ export function LoginForm() {
             className="h-12 rounded-xl border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-all"
           />
         </Form.Item>
+
+        <div className="mb-6 flex justify-center">
+          <Turnstile 
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
+            onSuccess={(token) => setToken(token)}
+            onExpire={() => setToken('')}
+            onError={() => setToken('')}
+          />
+        </div>
 
         <Form.Item className="mb-0">
           <Button

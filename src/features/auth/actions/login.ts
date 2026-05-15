@@ -6,9 +6,26 @@ import { cookies } from 'next/headers';
 import { loginSchema, type LoginInput } from '@/types/auth';
 import { ActionResult, successResponse, errorResponse } from '@/lib/actions';
 
-export async function login(input: LoginInput): Promise<ActionResult> {
+export async function login(input: LoginInput & { token: string }): Promise<ActionResult> {
   try {
-    const validated = loginSchema.parse(input);
+    // 1. Xác thực Turnstile Token với Cloudflare
+    const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+    const verifyRes = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${process.env.TURNSTILE_SECRET_KEY}&response=${input.token}`,
+    });
+
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success) {
+      return errorResponse('Xác thực bảo mật không hợp lệ. Vui lòng thử lại.');
+    }
+
+    // 2. Tiếp tục logic đăng nhập bình thường
+    const validated = loginSchema.parse({
+      username: input.username,
+      password: input.password
+    });
     
     const result = await query<any>(
       'SELECT * FROM UserInfo WHERE ID = @id',
