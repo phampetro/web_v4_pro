@@ -128,7 +128,7 @@ export async function login(input: LoginInput & { token: string }): Promise<Acti
     const sessionToken = await encrypt(sessionData);
 
     const cookieStore = await cookies();
-    cookieStore.set('session_token', token, {
+    cookieStore.set('session_token', sessionToken, {
       httpOnly: true,
       secure: false, // Cho phép chạy cả trên HTTP (không SSL)
       sameSite: 'lax',
