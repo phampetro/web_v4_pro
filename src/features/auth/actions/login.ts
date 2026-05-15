@@ -27,8 +27,9 @@ export async function login(input: LoginInput & { token: string }): Promise<Acti
       password: input.password
     });
     
+    // Kiểm tra thông tin user và trạng thái khóa
     const result = await query<any>(
-      'SELECT * FROM UserInfo WHERE ID = @id',
+      'SELECT *, DATEADD(HOUR, 7, GETUTCDATE()) as CurrentTime FROM UserInfo WHERE ID = @id',
       { id: validated.username }
     );
     
@@ -38,11 +39,46 @@ export async function login(input: LoginInput & { token: string }): Promise<Acti
       return errorResponse('Tài khoản không tồn tại');
     }
 
+    // Kiểm tra xem có đang bị khóa không
+    if (user.LockoutUntil && new Date(user.LockoutUntil) > new Date(user.CurrentTime)) {
+      const waitTime = Math.ceil((new Date(user.LockoutUntil).getTime() - new Date(user.CurrentTime).getTime()) / 1000);
+      return errorResponse(`Tài khoản đang bị tạm khóa do nhập sai nhiều lần. Vui lòng thử lại sau ${waitTime} giây.`);
+    }
+
     const passwordMatch = await bcrypt.compare(validated.password, user.pass_hash);
     
     if (!passwordMatch) {
-      return errorResponse('Mật khẩu không chính xác');
+      // Tính toán thời gian khóa tăng dần: 3 lần sai = 30s, 5 lần = 5p, 10 lần = 15p
+      let lockSeconds = 0;
+      const newFailedAttempts = (user.FailedAttempts || 0) + 1;
+      
+      if (newFailedAttempts >= 10) lockSeconds = 900; // 15 phút
+      else if (newFailedAttempts >= 5) lockSeconds = 300; // 5 phút
+      else if (newFailedAttempts >= 3) lockSeconds = 30;  // 30 giây
+
+      await query(
+        `UPDATE UserInfo SET 
+          FailedAttempts = @failed, 
+          LockoutUntil = DATEADD(SECOND, @lockSec, DATEADD(HOUR, 7, GETUTCDATE())) 
+         WHERE ID = @id`,
+        { id: validated.username, failed: newFailedAttempts, lockSec: lockSeconds }
+      );
+
+      return errorResponse(lockSeconds > 0 
+        ? `Mật khẩu không chính xác. Bạn đã bị khóa tạm thời ${lockSeconds} giây.` 
+        : `Mật khẩu không chính xác (Lần ${newFailedAttempts})`);
     }
+
+    // Đăng nhập thành công: Cập nhật nhật ký và reset lỗi
+    await query(
+      `UPDATE UserInfo SET 
+        LastLogin = DATEADD(HOUR, 7, GETUTCDATE()), 
+        LoginCount = ISNULL(LoginCount, 0) + 1,
+        FailedAttempts = 0,
+        LockoutUntil = NULL
+       WHERE ID = @id`,
+      { id: validated.username }
+    );
 
     // Thiết lập session
     const sessionData = {
