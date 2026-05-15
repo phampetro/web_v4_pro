@@ -9,9 +9,15 @@ export default async function DashboardLayout({
   const { getAuthSession } = await import('@/lib/auth-server');
   const session = await getAuthSession();
   const initialUsername = session?.username || '';
+  const initialPermissions = session?.permissions || [];
+  const initialRole = session?.quyenQL || '';
 
   return (
-    <DashboardLayoutClient initialUsername={initialUsername}>
+    <DashboardLayoutClient 
+      initialUsername={initialUsername} 
+      initialPermissions={initialPermissions}
+      initialRole={initialRole}
+    >
       {children}
     </DashboardLayoutClient>
   );

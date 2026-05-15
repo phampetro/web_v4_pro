@@ -107,7 +107,14 @@ export default function DashboardLayoutClient({
     return ngayUpdate ? dayjs(ngayUpdate).format('DD/MM/YYYY') : '--/--/----';
   };
 
-  const menuItems: MenuProps['items'] = [
+  // Hàm kiểm tra quyền
+  const hasPermission = (permKey: string) => {
+    if (permissions.includes('*')) return true;
+    return permissions.includes(permKey);
+  };
+
+  // Cấu hình Menu gốc
+  const rawMenuItems: any[] = [
     {
       key: '/dashboard',
       icon: <DashboardOutlined />,
@@ -144,6 +151,32 @@ export default function DashboardLayoutClient({
       ]
     },
   ];
+
+  // Thêm menu Admin nếu là ADMIN
+  if (role === 'ADMIN') {
+    rawMenuItems.push({
+      key: 'admin',
+      icon: <SettingOutlined />,
+      label: 'Quản trị',
+      children: [
+        { key: '/dashboard/admin/permissions', icon: <LockOutlined />, label: 'Phân quyền' },
+      ],
+    });
+  }
+
+  // Lọc Menu dựa trên quyền
+  const menuItems: MenuProps['items'] = rawMenuItems.map(item => {
+    // Nếu là item có con (submenu)
+    if (item.children) {
+      const filteredChildren = item.children.filter((child: any) => hasPermission(`menu:${child.key}`));
+      if (filteredChildren.length > 0) {
+        return { ...item, children: filteredChildren };
+      }
+      return null;
+    }
+    // Nếu là item đơn lẻ
+    return hasPermission(`menu:${item.key}`) ? item : null;
+  }).filter(Boolean);
 
   const handleLogout = async () => {
     await logout();

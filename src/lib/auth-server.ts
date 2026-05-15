@@ -6,6 +6,7 @@ export interface AuthSession {
   username: string;
   quyenQL: string;
   quyen: string;
+  permissions: string[];
 }
 
 const secretKey = process.env.SESSION_SECRET || 'phampetro_dms_v4_secret_key_2026_safe';

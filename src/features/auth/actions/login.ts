@@ -85,16 +85,47 @@ export async function login(input: LoginInput & { token: string }): Promise<Acti
       { id: validated.username }
     );
 
+    // Lấy danh sách quyền từ bảng AppPermissions
+    // Lấy cả quyền theo Nhóm (Role) và quyền riêng theo Cá nhân (User)
+    const permsResult = await query<any>(
+      `SELECT PermissionKey, IsAllowed, TargetType 
+       FROM AppPermissions 
+       WHERE (TargetType = 'ROLE' AND TargetValue = @role)
+          OR (TargetType = 'USER' AND TargetValue = @userId)`,
+      { role: user.Quyen_QL || '', userId: user.ID }
+    );
+
+    // Logic trộn quyền: Quyền USER ghi đè quyền ROLE cho cùng 1 PermissionKey
+    const permissionMap = new Map<string, boolean>();
+    permsResult.recordset.forEach((p: any) => {
+      // Nếu là quyền của USER hoặc Key này chưa có trong Map thì mới set
+      // (Vì truy vấn có thể trả về cả 2 dòng cho cùng 1 key, ta ưu tiên USER)
+      if (p.TargetType === 'USER' || !permissionMap.has(p.PermissionKey)) {
+        permissionMap.set(p.PermissionKey, p.IsAllowed);
+      }
+    });
+
+    // Chuyển Map thành mảng các Key được phép (IsAllowed = 1)
+    let finalPermissions = Array.from(permissionMap.entries())
+      .filter(([_, allowed]) => allowed)
+      .map(([key]) => key);
+
+    // Đặc cách: Nếu là ADMIN thì luôn có toàn quyền '*'
+    if (user.Quyen_QL === 'ADMIN') {
+      finalPermissions = ['*'];
+    }
+
     // Thiết lập session
     const sessionData = {
       id: user.ID,
       username: user.ID,
       quyenQL: user.Quyen_QL || '',
       quyen: user.Quyen || '',
+      permissions: finalPermissions
     };
 
     const { encrypt } = await import('@/lib/auth-server');
-    const token = await encrypt(sessionData);
+    const sessionToken = await encrypt(sessionData);
 
     const cookieStore = await cookies();
     cookieStore.set('session_token', token, {
