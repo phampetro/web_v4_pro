@@ -9,16 +9,21 @@ import { ActionResult, successResponse, errorResponse } from '@/lib/actions';
 export async function login(input: LoginInput & { token: string }): Promise<ActionResult> {
   try {
     // 1. Xác thực Turnstile Token với Cloudflare
-    const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-    const verifyRes = await fetch(verifyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${process.env.TURNSTILE_SECRET_KEY}&response=${input.token}`,
-    });
+    // Bỏ qua trong môi trường dev để tiện test trên localhost
+    const isDevBypass = process.env.NODE_ENV === 'development' && input.token === 'dev-bypass';
+    
+    if (!isDevBypass) {
+      const verifyUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+      const verifyRes = await fetch(verifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${process.env.TURNSTILE_SECRET_KEY}&response=${input.token}`,
+      });
 
-    const verifyData = await verifyRes.json();
-    if (!verifyData.success) {
-      return errorResponse('Xác thực bảo mật không hợp lệ. Vui lòng thử lại.');
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        return errorResponse('Xác thực bảo mật không hợp lệ. Vui lòng thử lại.');
+      }
     }
 
     // 2. Tiếp tục logic đăng nhập bình thường

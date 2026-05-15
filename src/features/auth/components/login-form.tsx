@@ -1,20 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, Typography, App } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { loginSchema, type LoginInput } from '@/types/auth';
 import { useRouter } from 'next/navigation';
 import { login } from '../actions/login';
 
-import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
-import { useRef } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 const { Title, Text } = Typography;
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState<string>('');
+  const isDev = process.env.NODE_ENV === 'development';
+  // Trong môi trường dev, bỏ qua Turnstile để tiện test
+  const [token, setToken] = useState<string>(isDev ? 'dev-bypass' : '');
   const router = useRouter();
   const { message } = App.useApp();
   const [form] = Form.useForm();
@@ -105,15 +106,17 @@ export function LoginForm() {
           />
         </Form.Item>
 
-        <div className="mb-6 flex justify-center">
-          <Turnstile 
-            ref={turnstileRef}
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
-            onSuccess={(token) => setToken(token)}
-            onExpire={() => setToken('')}
-            onError={() => setToken('')}
-          />
-        </div>
+        {/* Ẩn Mắt thần trong môi trường dev để tiện test */}
+        {!isDev && (
+          <div className="mb-6 flex justify-center">
+            <Turnstile 
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
+              onSuccess={(token) => setToken(token)}
+              onExpire={() => setToken('')}
+              onError={() => setToken('')}
+            />
+          </div>
+        )}
 
         <Form.Item className="mb-0">
           <Button
