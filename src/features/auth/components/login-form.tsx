@@ -7,13 +7,15 @@ import { loginSchema, type LoginInput } from '@/types/auth';
 import { useRouter } from 'next/navigation';
 import { login } from '../actions/login';
 
-import { Turnstile } from '@marsidev/react-turnstile';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+import { useRef } from 'react';
 
 const { Title, Text } = Typography;
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string>('');
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const router = useRouter();
   const { message } = App.useApp();
 
@@ -31,9 +33,14 @@ export function LoginForm() {
         window.location.href = '/dashboard';
       } else {
         message.error(result.error || 'Tài khoản hoặc mật khẩu không chính xác');
+        // Reset Turnstile để lấy token mới cho lần thử tiếp theo
+        turnstileRef.current?.reset();
+        setToken('');
       }
     } catch (error) {
       message.error('Đã có lỗi xảy ra');
+      turnstileRef.current?.reset();
+      setToken('');
     } finally {
       setLoading(false);
     }
@@ -84,6 +91,7 @@ export function LoginForm() {
 
         <div className="mb-6 flex justify-center">
           <Turnstile 
+            ref={turnstileRef}
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
             onSuccess={(token) => setToken(token)}
             onExpire={() => setToken('')}
