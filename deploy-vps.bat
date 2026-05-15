@@ -62,13 +62,21 @@ copy /y ".env" ".next\standalone\.env" >nul
 
 :: 7. KHOI CHAY UNG DUNG
 echo [BUOC 4] Dang khoi chay bang PM2... >> %LOG_FILE%
+set PM2_HOME=C:\Users\Administrator\.pm2
 set HOSTNAME=0.0.0.0
 set PORT=3000
-call pm2 start .next\standalone\server.js --name "web_v4" >> %LOG_FILE% 2>&1
+
+:: THAN CHU: Ngan GitHub Runner giet tien trinh sau khi xong job
+set RUNNER_TRACKING_ID=dontkillme
+
+cd /d "D:\web_v4\web_v4_pro\.next\standalone"
+call pm2 delete web_v4 >> %LOG_FILE% 2>&1
+call pm2 start server.js --name "web_v4" --node-args="-r next/dist/server/next-utils.js" >> %LOG_FILE% 2>&1
 call pm2 save >> %LOG_FILE% 2>&1
 
 :: 8. KHOI CHAY CADDY
 echo [INFO] Dang khoi dong lai Caddy... >> %LOG_FILE%
+cd /d "D:\web_v4\web_v4_pro"
 if exist "Caddyfile" (
     caddy stop >> %LOG_FILE% 2>&1
     caddy start --config Caddyfile >> %LOG_FILE% 2>&1
