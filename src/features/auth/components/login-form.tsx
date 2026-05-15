@@ -15,9 +15,23 @@ const { Title, Text } = Typography;
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string>('');
-  const turnstileRef = useRef<TurnstileInstance>(null);
   const router = useRouter();
   const { message } = App.useApp();
+  const [form] = Form.useForm();
+
+  // Tự động khôi phục tên đăng nhập nếu vừa bị reload do sai pass
+  useEffect(() => {
+    const savedUsername = sessionStorage.getItem('last_username');
+    if (savedUsername) {
+      form.setFieldsValue({ username: savedUsername });
+      sessionStorage.removeItem('last_username');
+      // Tự động focus vào ô mật khẩu để người dùng nhập lại ngay
+      setTimeout(() => {
+        const passInput = document.getElementById('login_password');
+        if (passInput) passInput.focus();
+      }, 500);
+    }
+  }, [form]);
 
   const onFinish = async (values: LoginInput) => {
     if (!token) {
@@ -30,22 +44,19 @@ export function LoginForm() {
       const result = await login({ ...values, token });
       if (result.success) {
         message.success('Đăng nhập thành công!');
+        sessionStorage.removeItem('last_username');
         window.location.href = '/dashboard';
       } else {
         message.error(result.error || 'Tài khoản hoặc mật khẩu không chính xác');
         
-        // Reset Mắt thần bằng lệnh chính thống của Cloudflare
-        setToken('');
-        if (turnstileRef.current) {
-          turnstileRef.current.reset();
-          console.log('--- Đã gọi lệnh Reset Mắt thần ---');
-        }
+        // Lưu lại username và reload trang để vượt qua lỗi Trusted Types của Mắt thần
+        sessionStorage.setItem('last_username', values.username);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500); // Đợi 1.5s để người dùng kịp đọc thông báo lỗi
       }
     } catch (error) {
       message.error('Đã có lỗi xảy ra');
-      setToken('');
-      turnstileRef.current?.reset();
-    } finally {
       setLoading(false);
     }
   };
@@ -62,6 +73,7 @@ export function LoginForm() {
       </div>
 
       <Form
+        form={form}
         name="login"
         layout="vertical"
         onFinish={onFinish}
