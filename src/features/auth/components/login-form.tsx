@@ -15,7 +15,7 @@ const { Title, Text } = Typography;
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string>('');
-  const [turnstileKey, setTurnstileKey] = useState(0);
+  const [turnstileKey, setTurnstileKey] = useState('initial');
   const router = useRouter();
   const { message } = App.useApp();
 
@@ -33,14 +33,20 @@ export function LoginForm() {
         window.location.href = '/dashboard';
       } else {
         message.error(result.error || 'Tài khoản hoặc mật khẩu không chính xác');
-        // Force re-mount Turnstile bằng cách đổi key
-        setTurnstileKey(prev => prev + 1);
+        
+        // Buộc làm mới Turnstile bằng cách xóa token và đổi key sau một khoảng trễ nhỏ
         setToken('');
+        setTimeout(() => {
+          setTurnstileKey(Math.random().toString());
+          console.log('--- Đang làm mới Mắt thần (Cloudflare Turnstile) ---');
+        }, 100);
       }
     } catch (error) {
       message.error('Đã có lỗi xảy ra');
-      setTurnstileKey(prev => prev + 1);
       setToken('');
+      setTimeout(() => {
+        setTurnstileKey(Math.random().toString());
+      }, 100);
     } finally {
       setLoading(false);
     }
