@@ -15,7 +15,7 @@ const { Title, Text } = Typography;
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string>('');
-  const [turnstileKey, setTurnstileKey] = useState('initial');
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const router = useRouter();
   const { message } = App.useApp();
 
@@ -34,19 +34,17 @@ export function LoginForm() {
       } else {
         message.error(result.error || 'Tài khoản hoặc mật khẩu không chính xác');
         
-        // Buộc làm mới Turnstile bằng cách xóa token và đổi key sau một khoảng trễ nhỏ
+        // Reset Mắt thần bằng lệnh chính thống của Cloudflare
         setToken('');
-        setTimeout(() => {
-          setTurnstileKey(Math.random().toString());
-          console.log('--- Đang làm mới Mắt thần (Cloudflare Turnstile) ---');
-        }, 100);
+        if (turnstileRef.current) {
+          turnstileRef.current.reset();
+          console.log('--- Đã gọi lệnh Reset Mắt thần ---');
+        }
       }
     } catch (error) {
       message.error('Đã có lỗi xảy ra');
       setToken('');
-      setTimeout(() => {
-        setTurnstileKey(Math.random().toString());
-      }, 100);
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -97,7 +95,7 @@ export function LoginForm() {
 
         <div className="mb-6 flex justify-center">
           <Turnstile 
-            key={turnstileKey}
+            ref={turnstileRef}
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
             onSuccess={(token) => setToken(token)}
             onExpire={() => setToken('')}
