@@ -5,39 +5,21 @@ import { Flex, App, Typography, Spin, Button, Space } from 'antd';
 import { ReloadOutlined, DownloadOutlined } from '@ant-design/icons';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { getKPSDS } from '../actions/get-kpsds';
-import { getChoPho } from '../actions/get-cho-pho';
-import { KHRecord } from '../types';
+import { getXemNhanhTuyenSummary, SummaryRow, SummaryCell } from '../actions/get-xem-nhanh-tuyen-summary';
 import { XemNhanhTuyenTable } from '@/features/khach-hang/components/xem-nhanh-tuyen-table';
 import { XemNhanhTuyenFilters } from '@/features/khach-hang/components/xem-nhanh-tuyen-filters';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 const { Text } = Typography;
 
-export interface SummaryCell {
-  total: number;
-  marketCount: number;
-  details: Record<string, number>;
-}
-
-export interface SummaryRow {
-  key: string;
-  khuVuc: string;
-  nvbh: string;
-  tongKH: number;
-  t2: SummaryCell;
-  t3: SummaryCell;
-  t4: SummaryCell;
-  t5: SummaryCell;
-  t6: SummaryCell;
-  t7: SummaryCell;
-  cn: SummaryCell;
-}
+// Export lại interface cho Table sử dụng
+export type { SummaryRow, SummaryCell };
 
 export function XemNhanhTuyenContainer() {
   const { message } = App.useApp();
-  const [data, setData] = useState<KHRecord[]>([]);
-  const [choPhoMap, setChoPhoMap] = useState<Record<string, string>>({});
+  const [rawSummaryData, setRawSummaryData] = useState<SummaryRow[]>([]);
+  const [khuVucOptions, setKhuVucOptions] = useState<{label: string, value: string}[]>([]);
+  
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -49,23 +31,15 @@ export function XemNhanhTuyenContainer() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resKpsds, resChoPho] = await Promise.all([
-        getKPSDS(),
-        getChoPho()
-      ]);
+      const result = await getXemNhanhTuyenSummary();
 
-      if ('error' in resKpsds) throw new Error(resKpsds.error);
-      if ('error' in resChoPho) throw new Error(resChoPho.error);
+      if (result.error) throw new Error(result.error);
 
-      setData(resKpsds.data);
+      setRawSummaryData(result.data);
+      setKhuVucOptions(result.khuVucList.map(v => ({ label: v, value: v })));
       
-      const cpMap: Record<string, string> = {};
-      resChoPho.data.forEach(item => {
-        cpMap[item.MA_KH] = item.TRENDUONG_TRONGCHO;
-      });
-      setChoPhoMap(cpMap);
     } catch (err: any) {
-      message.error(err.message || 'Lỗi tải dữ liệu');
+      message.error(err.message || 'Lỗi tải dữ liệu tổng hợp');
     } finally {
       setLoading(false);
     }
@@ -75,53 +49,11 @@ export function XemNhanhTuyenContainer() {
     fetchData();
   }, [fetchData]);
 
+  // Chỉ lọc dữ liệu trên Client dựa theo bộ lọc (Rất nhẹ)
   const summaryData = useMemo(() => {
-    const groups: Record<string, any> = {};
-    const days = ['t2', 't3', 't4', 't5', 't6', 't7', 'cn'];
-    const dayMapping: Record<string, string> = { 'T2': 't2', 'T3': 't3', 'T4': 't4', 'T5': 't5', 'T6': 't6', 'T7': 't7', 'CN': 'cn' };
-
-    data.forEach(r => {
-      if (filters.khuVuc && r.Khu_Vực !== filters.khuVuc) return;
-
-      // Logic lọc F2 giống bản cũ (chỉ lấy v)
-      const tanSuat = r.Tần_Suất || '';
-      if (tanSuat.includes('F2') && !tanSuat.toLowerCase().includes('v')) return;
-
-      const key = `${r.Khu_Vực}_${r.Mã_Tên_NVBH}`;
-      if (!groups[key]) {
-        groups[key] = {
-          key,
-          khuVuc: r.Khu_Vực,
-          nvbh: r.Mã_Tên_NVBH,
-          khSet: new Set<string>(),
-        };
-        days.forEach(d => {
-          groups[key][d] = { total: 0, marketCount: 0, details: {} as Record<string, number> };
-        });
-      }
-
-      const g = groups[key];
-      g.khSet.add(r.Mã_KH);
-
-      const thuStr = r.Thứ || '';
-      Object.entries(dayMapping).forEach(([label, dayKey]) => {
-        if (thuStr.includes(label)) {
-          g[dayKey].total++;
-          g[dayKey].details[tanSuat] = (g[dayKey].details[tanSuat] || 0) + 1;
-          
-          const rawVal = choPhoMap[r.Mã_KH.trim()] || '';
-          if (rawVal.toLowerCase().includes('trong chợ')) {
-            g[dayKey].marketCount++;
-          }
-        }
-      });
-    });
-
-    return Object.values(groups).map(g => ({
-      ...g,
-      tongKH: g.khSet.size
-    })).sort((a, b) => (a.khuVuc || '').localeCompare(b.khuVuc || '') || (a.nvbh || '').localeCompare(b.nvbh || '')) as SummaryRow[];
-  }, [data, filters.khuVuc, choPhoMap]);
+    if (!filters.khuVuc) return rawSummaryData;
+    return rawSummaryData.filter(r => r.khuVuc === filters.khuVuc);
+  }, [rawSummaryData, filters.khuVuc]);
 
   const handleExportExcel = async () => {
     if (summaryData.length === 0) return;
@@ -237,9 +169,6 @@ export function XemNhanhTuyenContainer() {
     }
   };
 
-  const khuVucOptions = useMemo(() => {
-    return Array.from(new Set(data.map(r => r.Khu_Vực))).filter(Boolean).sort().map(v => ({ label: v, value: v }));
-  }, [data]);
 
   return (
     <Flex vertical gap={16} className="h-full">
