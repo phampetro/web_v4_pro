@@ -71,7 +71,7 @@ set RUNNER_TRACKING_ID=dontkillme
 
 cd /d "D:\web_v4\web_v4_pro\.next\standalone"
 call pm2 delete web_v4 >> %LOG_FILE% 2>&1
-call pm2 start server.js --name "web_v4" --node-args="-r next/dist/server/next-utils.js" >> %LOG_FILE% 2>&1
+call pm2 start server.js --name "web_v4" >> %LOG_FILE% 2>&1
 call pm2 save >> %LOG_FILE% 2>&1
 
 :: 8. KHOI CHAY CADDY
