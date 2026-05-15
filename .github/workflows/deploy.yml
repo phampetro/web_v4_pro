@@ -16,13 +16,9 @@ jobs:
       - name: Run Deploy Script
         shell: cmd
         run: |
-          echo "Syncing code from Runner workspace to Production..."
+          echo "Syncing code to Production folder..."
           robocopy "%GITHUB_WORKSPACE%" "D:\web_v4\web_v4_pro" /E /Z /XO /XF .env /XD .git node_modules .next /R:3 /W:5 /NFL /NDL /NJH /NJS
           
-          :: Luu y: Robocopy tra ve code 1 la thanh cong (co file copy), code 0 la khong co gi moi. 
-          :: Bat ky code nao < 8 deu la thanh cong.
-          if %ERRORLEVEL% GEQ 8 exit /b %ERRORLEVEL%
-          
-          cd /d D:\web_v4\web_v4_pro
           echo "Starting build and deploy process..."
+          cd /d D:\web_v4\web_v4_pro
           call deploy-vps.bat
