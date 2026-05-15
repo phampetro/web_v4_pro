@@ -15,7 +15,7 @@ const { Title, Text } = Typography;
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string>('');
-  const turnstileRef = useRef<TurnstileInstance>(null);
+  const [turnstileKey, setTurnstileKey] = useState(0);
   const router = useRouter();
   const { message } = App.useApp();
 
@@ -33,13 +33,13 @@ export function LoginForm() {
         window.location.href = '/dashboard';
       } else {
         message.error(result.error || 'Tài khoản hoặc mật khẩu không chính xác');
-        // Reset Turnstile để lấy token mới cho lần thử tiếp theo
-        turnstileRef.current?.reset();
+        // Force re-mount Turnstile bằng cách đổi key
+        setTurnstileKey(prev => prev + 1);
         setToken('');
       }
     } catch (error) {
       message.error('Đã có lỗi xảy ra');
-      turnstileRef.current?.reset();
+      setTurnstileKey(prev => prev + 1);
       setToken('');
     } finally {
       setLoading(false);
@@ -91,7 +91,7 @@ export function LoginForm() {
 
         <div className="mb-6 flex justify-center">
           <Turnstile 
-            ref={turnstileRef}
+            key={turnstileKey}
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
             onSuccess={(token) => setToken(token)}
             onExpire={() => setToken('')}
