@@ -6,7 +6,7 @@ echo [INFO] --- BAT DAU DEPLOY MOI ---
 
 :: 1. TU DONG NAP PATH
 echo [INFO] Dang nap bien moi truong...
-set PATH=%PATH%;C:\Program Files\nodejs\;C:\Users\Administrator\AppData\Roaming\npm\
+set PATH=%PATH%;C:\Program Files\nodejs\;%APPDATA%\npm
 
 :: 2. KIEM TRA QUYEN ADMIN
 echo [INFO] Dang kiem tra quyen Administrator...
@@ -26,7 +26,7 @@ if %errorlevel% neq 0 (
 
 :: 4. DON DEP TRUOC KHI BUILD
 echo [INFO] Dang dung cac dich vu cu...
-set PM2_HOME=C:\Users\Administrator\.pm2
+set PM2_HOME=%USERPROFILE%\.pm2
 call pm2 delete web_v4 2>nul
 taskkill /f /im node.exe 2>nul
 
