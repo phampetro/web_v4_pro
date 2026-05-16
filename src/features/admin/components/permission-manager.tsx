@@ -64,6 +64,13 @@ const PERMISSION_TREE = [
       { title: 'Báo cáo bao phủ', key: 'menu:/dashboard/cau-hinh' },
       { title: 'Báo cáo mở mới', key: 'menu:/dashboard/bao-cao-mo-moi' },
     ]
+  },
+  {
+    title: 'Hệ thống Quản trị',
+    key: 'group:admin',
+    children: [
+      { title: 'Quản lý Phân quyền', key: 'menu:/dashboard/admin/permissions' },
+    ]
   }
 ];
 
@@ -135,7 +142,7 @@ export default function PermissionManager({ adminUsername }: { adminUsername: st
       }
     >
       <Alert 
-        message="Lưu ý quan trọng"
+        title="Lưu ý quan trọng"
         description="Quyền của Nhóm (Role) sẽ áp dụng cho tất cả nhân viên thuộc nhóm đó. Quyền của Cá nhân (User) sẽ ghi đè lên quyền của nhóm nếu có thiết lập riêng."
         type="info"
         showIcon
@@ -186,7 +193,7 @@ export default function PermissionManager({ adminUsername }: { adminUsername: st
         </TabPane>
       </Tabs>
 
-      <Divider orientation="left">Danh sách Menu & Tính năng</Divider>
+      <Divider>Danh sách Menu & Tính năng</Divider>
 
       <div className="bg-white border rounded-xl p-6 min-h-[400px] relative">
         {loading ? (

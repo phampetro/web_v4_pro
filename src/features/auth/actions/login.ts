@@ -92,14 +92,12 @@ export async function login(input: LoginInput & { token: string }): Promise<Acti
        FROM AppPermissions 
        WHERE (TargetType = 'ROLE' AND TargetValue = @role)
           OR (TargetType = 'USER' AND TargetValue = @userId)`,
-      { role: user.Quyen_QL || '', userId: user.ID }
+      { role: user.Quyen || '', userId: user.ID }
     );
 
     // Logic trộn quyền: Quyền USER ghi đè quyền ROLE cho cùng 1 PermissionKey
     const permissionMap = new Map<string, boolean>();
     permsResult.recordset.forEach((p: any) => {
-      // Nếu là quyền của USER hoặc Key này chưa có trong Map thì mới set
-      // (Vì truy vấn có thể trả về cả 2 dòng cho cùng 1 key, ta ưu tiên USER)
       if (p.TargetType === 'USER' || !permissionMap.has(p.PermissionKey)) {
         permissionMap.set(p.PermissionKey, p.IsAllowed);
       }
@@ -111,7 +109,7 @@ export async function login(input: LoginInput & { token: string }): Promise<Acti
       .map(([key]) => key);
 
     // Đặc cách: Nếu là ADMIN thì luôn có toàn quyền '*'
-    if (user.Quyen_QL === 'ADMIN') {
+    if (user.Quyen === 'ADMIN') {
       finalPermissions = ['*'];
     }
 
@@ -119,8 +117,8 @@ export async function login(input: LoginInput & { token: string }): Promise<Acti
     const sessionData = {
       id: user.ID,
       username: user.ID,
-      quyenQL: user.Quyen_QL || '',
-      quyen: user.Quyen || '',
+      quyenQL: user.Quyen_QL || '', // Giữ lại cho việc lọc dữ liệu sau này
+      quyen: user.Quyen || '',      // Đây mới là Role (ADMIN/RSM...)
       permissions: finalPermissions
     };
 

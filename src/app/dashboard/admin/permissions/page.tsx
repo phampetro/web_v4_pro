@@ -10,8 +10,10 @@ export const metadata = {
 export default async function PermissionsPage() {
   const session = await getAuthSession();
 
-  // Chỉ cho phép ADMIN vào trang này
-  if (!session || session.quyenQL !== 'ADMIN') {
+  // Cho phép ADMIN hoặc người được cấp quyền cụ thể vào trang này
+  const hasAdminPerm = session?.permissions?.includes('*') || session?.permissions?.includes('menu:/dashboard/admin/permissions');
+  
+  if (!session || (session.quyen !== 'ADMIN' && !hasAdminPerm)) {
     redirect('/dashboard');
   }
 

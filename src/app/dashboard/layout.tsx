@@ -10,7 +10,7 @@ export default async function DashboardLayout({
   const session = await getAuthSession();
   const initialUsername = session?.username || '';
   const initialPermissions = session?.permissions || [];
-  const initialRole = session?.quyenQL || '';
+  const initialRole = session?.quyen || '';
 
   return (
     <DashboardLayoutClient 

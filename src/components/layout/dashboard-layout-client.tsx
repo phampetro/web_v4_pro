@@ -39,14 +39,20 @@ const { Title, Text } = Typography;
 interface DashboardLayoutClientProps {
   children: React.ReactNode;
   initialUsername: string;
+  initialPermissions: string[];
+  initialRole: string;
 }
 
 export default function DashboardLayoutClient({
   children,
   initialUsername,
+  initialPermissions,
+  initialRole,
 }: DashboardLayoutClientProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [username, setUsername] = useState(initialUsername);
+  const [permissions] = useState<string[]>(initialPermissions || []);
+  const [role] = useState<string>(initialRole || '');
   const [ngayUpdate, setNgayUpdate] = useState<string | null>(null);
   const [ngayUpdateLoading, setNgayUpdateLoading] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -150,32 +156,36 @@ export default function DashboardLayoutClient({
         { key: '/dashboard/bao-cao-mo-moi', icon: <PlusCircleOutlined />, label: 'Báo cáo mở mới' }
       ]
     },
-  ];
-
-  // Thêm menu Admin nếu là ADMIN
-  if (role === 'ADMIN') {
-    rawMenuItems.push({
+    {
       key: 'admin',
       icon: <SettingOutlined />,
       label: 'Quản trị',
       children: [
         { key: '/dashboard/admin/permissions', icon: <LockOutlined />, label: 'Phân quyền' },
       ],
-    });
-  }
+    },
+  ];
+
+  // Hàm kiểm tra quyền mở rộng: ADMIN thấy hết
+  const canSeeMenu = (item: any) => {
+    if (role === 'ADMIN' || permissions.includes('*')) return true; 
+    if (item.children) {
+      return item.children.some((child: any) => hasPermission(`menu:${child.key}`));
+    }
+    return hasPermission(`menu:${item.key}`);
+  };
 
   // Lọc Menu dựa trên quyền
   const menuItems: MenuProps['items'] = rawMenuItems.map(item => {
-    // Nếu là item có con (submenu)
+    if (!canSeeMenu(item)) return null;
+
     if (item.children) {
-      const filteredChildren = item.children.filter((child: any) => hasPermission(`menu:${child.key}`));
-      if (filteredChildren.length > 0) {
-        return { ...item, children: filteredChildren };
-      }
-      return null;
+      const filteredChildren = item.children.filter((child: any) => 
+        role === 'ADMIN' || permissions.includes('*') || hasPermission(`menu:${child.key}`)
+      );
+      return { ...item, children: filteredChildren };
     }
-    // Nếu là item đơn lẻ
-    return hasPermission(`menu:${item.key}`) ? item : null;
+    return item;
   }).filter(Boolean);
 
   const handleLogout = async () => {
